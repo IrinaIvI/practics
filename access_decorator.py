@@ -1,6 +1,5 @@
 user_roles = None
 def acces_control(roles):
-
     def decorator(func):
         def wrapper(*args, **kwargs):
             if not any(role in user_roles for role in roles):
