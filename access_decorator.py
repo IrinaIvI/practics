@@ -4,7 +4,7 @@ def acces_control(roles):
     def decorator(func):
         def wrapper(*args, **kwargs):
             if not any(role in user_roles for role in roles):
-                raise PermissionError(f"Отказано в доступе. Ни одна из ролей пользователя не имеет соответствующих прав.")
+                raise PermissionError("Отказано в доступе. Ни одна из ролей пользователя не имеет соответствующих прав.")
             return func(*args, **kwargs)
         return wrapper
     return decorator
