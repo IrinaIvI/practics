@@ -14,7 +14,7 @@ def lru_cache(*args, **kwargs):
                 for key in kwargs:
                     hash(key)
             except TypeError:
-                raise ValueError("Данные объекты не могут быть использованы в качестве ключей.")
+                raise ValueError("Объекты изменяемого типа не могут быть использованы.")
             return (args, frozenset(kwargs.items()))
 
         def wrapper(*args, **kwargs):
