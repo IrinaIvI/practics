@@ -11,6 +11,7 @@ def generate_data(n):
 def process_number(number):
     if number % 2 == 0:
         return number
+    return None
 
 def process_number_with_queue(input_queue, output_queue):
     while True:
@@ -23,7 +24,7 @@ def process_number_with_queue(input_queue, output_queue):
 
 if __name__ == '__main__':
     num_cores = os.cpu_count()
-    n = 10000
+    n = 500
     list_of_num = generate_data(n)
 
     # Вариант А: Пул потоков
