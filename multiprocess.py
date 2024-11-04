@@ -10,75 +10,76 @@ def generate_data(n):
 
 def process_number(number):
     if number % 2 == 0:
-        return number
-    return None
+        return True
+    return False
 
-def process_number_with_queue(input_queue, output_queue):
+def process_with_thread_pool(data):
+    with ThreadPoolExecutor() as executor:
+        return list(executor.map(process_number, data))
+
+def process_with_pool(data):
+    num_cores = os.cpu_count()
+    with Pool(processes=num_cores) as pool:
+        return pool.map(process_number, data)
+    
+def process_num_with_queue(input_queue, output_queue):
     while True:
         try:
-            number = input_queue.get(timeout=1)
+            number = input_queue.get_nowait() 
             result = process_number(number)
             output_queue.put(result)
-        except:
-            break 
+        except Exception:
+            break
+
+def process_with_queue(data):
+    output_queue = Queue()
+    p = Process(target=process_num_with_queue, args=(data, output_queue))
+    p.start()
+    p.join()
+
+    results = []
+    while not output_queue.empty():
+        results.append(output_queue.get())
+
+    return results
 
 if __name__ == '__main__':
-    num_cores = os.cpu_count()
-    n = 500
-    list_of_num = generate_data(n)
-
-    # Вариант А: Пул потоков
-    start_time = time.time()
-    with ThreadPoolExecutor() as executor:
-        results_a = list(executor.map(process_number, list_of_num))
-    end_time = time.time()
-    print(f"Время выполнения способа А (Пул потоков): {end_time - start_time:.6f} секунд")
-
-    # Вариант Б: Пул процессов
-    start_time = time.time()
-    with Pool(processes=num_cores) as pool:
-        results_b = pool.map(process_number, list_of_num)
-    end_time = time.time()
-    print(f"Время выполнения способа Б (Пул процессов): {end_time - start_time:.6f} секунд")
+    n = 10_000_000
+    data = generate_data(n)
 
     # Однопоточное выполнение
     start_time = time.time()
-    results_single = []
-    for i in list_of_num:
-        results_single.append(process_number(i))
+    results_single = [process_number(num) for num in data]
     end_time = time.time()
-    print(f"Время выполнения способа однопоточного: {end_time - start_time:.6f} секунд")
+    time_single = end_time - start_time
+    print(f"Время выполнения однопоточного: {time_single:.6f} секунд")
 
-    # Вариант В: Отдельные процессы с очередью
-    input_queue = Queue()
-    output_queue = Queue()
-
-    for number in list_of_num:
-        input_queue.put(number)
-
-    processes = []
+    # Вариант А: Пул потоков
     start_time = time.time()
-    for _ in range(num_cores):
-        p = Process(target=process_number_with_queue, args=(input_queue, output_queue))
-        processes.append(p)
-        p.start()
-
-    for p in processes:
-        p.join()
-
-    results_v = []
-    while not output_queue.empty():
-        results_v.append(output_queue.get())
-
+    results_a = process_with_thread_pool(data)
     end_time = time.time()
-    total_time_v = end_time - start_time
-    print(f"Время выполнения способа В (Отдельные процессы с очередью): {total_time_v:.6f} секунд")
+    time_a = end_time - start_time
+    print(f"Время выполнения способа А (Пул потоков): {time_a:.6f} секунд")
 
+    # Вариант Б: Пул процессов
+    start_time = time.time()
+    results_b = process_with_pool(data)
+    end_time = time.time()
+    time_b = end_time - start_time
+    print(f"Время выполнения способа Б (Пул процессов): {time_b:.6f} секунд")
+
+    # Вариант В: Отдельный процесс с очередью
+    start_time = time.time()
+    results_v = process_with_queue(data)
+    end_time = time.time()
+    time_c = end_time - start_time
+    print(f"Время выполнения способа В (Отдельный процесс с очередью): {time_c:.6f} секунд")
+
+    results = {
+        "results_single": results_single,
+        "results_a": results_a,
+        "results_b": results_b,
+        "results_v": results_v,
+    }
     with open('./results.json', 'w') as f:
-        json.dump({
-            "results_a": results_a,
-            "results_b": results_b,
-            "results_single": results_single,
-            "results_v": results_v,
-        }, f)
-
+        json.dump(results, f)
