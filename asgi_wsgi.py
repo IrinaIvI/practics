@@ -32,7 +32,7 @@ async def asgi_func(scope, receive, send):
                 await send({
                     "type": "http.response.start",
                     "status": 200,
-                    "headers": [("Content-type", b"application/json")],
+                    "headers": [("Content-type", "application/json")],
                 })
                 await send({
                     "type": "http.response.body",
