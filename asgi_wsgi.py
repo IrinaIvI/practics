@@ -18,7 +18,7 @@ def wsgi_func(environ, start_response):
             return [f"Internal server error: {str(e)}".encode('utf-8')]
     else:
         start_response('405 Method Not Allowed', [("Content-Type", "text/plain")])
-        return [b"Method Not Allowed"]
+        return ["Method Not Allowed"]
     
 
 async def asgi_func(scope, receive, send):
