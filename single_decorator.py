@@ -1,7 +1,6 @@
 import redis
 from datetime import timedelta
 from functools import wraps
-import redis.client
 
 def single(max_processing_time: timedelta = 0):
     def decorator(func):
@@ -21,4 +20,3 @@ def single(max_processing_time: timedelta = 0):
                 raise Exception("Функция уже используется")
         return wrapper
     return decorator
-        
